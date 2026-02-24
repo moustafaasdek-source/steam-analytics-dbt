@@ -1,0 +1,122 @@
+version: 2
+
+models:
+  - name: stg_games
+    description: >
+      Cleaned game metadata from applicationInformation.csv.
+      Parses two date formats (DD-Mon-YY and Mon-YY), casts freetoplay to boolean,
+      derives release_year and release_month.
+    columns:
+      - name: app_id
+        description: Unique Steam application identifier
+        tests:
+          - unique
+          - not_null
+      - name: app_type
+        description: "Application type (game, advertising, demo, mod, dlc)"
+        tests:
+          - accepted_values:
+              values: ['game', 'advertising', 'demo', 'mod', 'dlc']
+      - name: app_name
+        description: Full application name (max 59 chars)
+        tests:
+          - not_null
+      - name: release_date
+        description: "Parsed release date (NULL for 139 apps with missing dates)"
+      - name: is_free_to_play
+        description: "Boolean: true if free-to-play, false if paid, null if unknown"
+
+  - name: stg_genres
+    description: >
+      One row per (app_id, genre). Unpivoted from wide-format CSV.
+      26 unique genres, max 8 per game.
+      Filters out junk numeric value "60" found in raw data.
+    columns:
+      - name: app_id
+        tests: [not_null]
+      - name: genre
+        tests: [not_null]
+
+  - name: stg_tags
+    description: >
+      One row per (app_id, tag). Unpivoted from wide-format CSV.
+      339 unique tags, max 20 per game.
+    columns:
+      - name: app_id
+        tests: [not_null]
+      - name: tag
+        tests: [not_null]
+
+  - name: stg_developers
+    description: >
+      One row per (app_id, developer). Unpivoted from wide-format CSV.
+      1,330 unique developers, max 7 per game.
+    columns:
+      - name: app_id
+        tests: [not_null]
+      - name: developer
+        tests: [not_null]
+
+  - name: stg_publishers
+    description: >
+      One row per (app_id, publisher). Unpivoted from wide-format CSV.
+      919 unique publishers, max 4 per game.
+    columns:
+      - name: app_id
+        tests: [not_null]
+      - name: publisher
+        tests: [not_null]
+
+  - name: stg_languages
+    description: >
+      One row per (app_id, language). Unpivoted from wide-format CSV.
+      31 unique languages, max 28 per game.
+    columns:
+      - name: app_id
+        tests: [not_null]
+      - name: language
+        tests: [not_null]
+
+  - name: stg_packages
+    description: >
+      One row per (app_id, package_id). Unpivoted from wide-format CSV.
+      Numeric package IDs (max 365,526), max 14 per game.
+    columns:
+      - name: app_id
+        tests: [not_null]
+      - name: package_id
+        tests: [not_null]
+
+  - name: stg_prices
+    description: >
+      Daily price history with renamed columns.
+      725,268 rows, 1,512 unique apps.
+      Date range: 2019-04-07 to 2020-08-12.
+    columns:
+      - name: app_id
+        tests: [not_null]
+      - name: price_date
+        tests: [not_null]
+      - name: initial_price
+        description: "Original listed price ($0.99 to $199.00)"
+      - name: final_price
+        description: "Actual selling price after discount ($0.49 to $199.00)"
+      - name: discount_pct
+        description: "Discount percentage (0 to 100)"
+
+  - name: stg_player_counts
+    description: >
+      Unified daily player counts from top and bottom 1000 datasets.
+      Top 1000: hourly data aggregated to daily (avg, peak, min).
+      Bottom 1000: already daily.
+      Combined date range: 2017-12-14 to 2020-08-12.
+    columns:
+      - name: app_id
+        tests: [not_null]
+      - name: activity_date
+        tests: [not_null]
+      - name: data_tier
+        description: "'top_1000' or 'bottom_1000' — identifies source dataset"
+        tests:
+          - accepted_values:
+              values: ['top_1000', 'bottom_1000']

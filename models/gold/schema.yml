@@ -1,0 +1,68 @@
+version: 2
+
+models:
+  - name: mart_game_summary
+    description: >
+      Primary analytics table: one row per game with all metrics pre-joined
+      from Silver layer. Includes genres, tags, developers, prices, player counts,
+      and derived fields (price_tier, popularity_quartile).
+      Expected: ~2,000 rows.
+    columns:
+      - name: app_id
+        description: Unique Steam application identifier
+        tests:
+          - unique
+          - not_null
+      - name: app_name
+        tests:
+          - not_null
+      - name: price_tier
+        description: "Categorical price bucket: Free to Play, $0-$5, $5-$15, $15-$30, $30+"
+        tests:
+          - accepted_values:
+              values: ['Free to Play', '$0-$5', '$5-$15', '$15-$30', '$30+']
+      - name: popularity_quartile
+        description: "1=lowest 25%, 4=highest 25% based on peak_players"
+        tests:
+          - accepted_values:
+              values: [1, 2, 3, 4]
+
+  - name: mart_genre_performance
+    description: >
+      Genre-level aggregations for Tableau genre analysis view.
+      One row per genre with game count, avg/median peak players,
+      free-to-play percentage, avg price, and avg languages.
+      Filtered to genres with 5+ games.
+    columns:
+      - name: genre
+        tests:
+          - unique
+          - not_null
+      - name: game_count
+        description: "Number of games in this genre (minimum 5)"
+
+  - name: mart_pricing_analysis
+    description: >
+      Price tier aggregations for Tableau pricing analysis view.
+      One row per price tier showing engagement metrics.
+      Filtered to app_type = 'game' only.
+    columns:
+      - name: price_tier
+        tests:
+          - unique
+          - not_null
+      - name: tier_sort_order
+        description: "Numeric sort order: 0=Free, 1=$0-$5, 2=$5-$15, 3=$15-$30, 4=$30+"
+
+  - name: mart_player_trends
+    description: >
+      Monthly platform-wide player trends with Year-over-Year growth.
+      One row per year-month (YYYY-MM format).
+      Date range: 2017-12 to 2020-08.
+    columns:
+      - name: year_month
+        tests:
+          - unique
+          - not_null
+      - name: yoy_growth_pct
+        description: "Year-over-year growth percentage (null for first year)"

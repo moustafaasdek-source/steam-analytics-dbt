@@ -1,0 +1,20 @@
+name: steam_analytics
+version: '1.0.0'
+config-version: 2
+profile: 'default'
+
+model-paths: ["models"]
+macro-paths: ["macros"]
+target-path: "target"
+clean-targets: ["target", "dbt_packages"]
+
+models:
+  steam_analytics:
+    silver:
+      +materialized: view
+      +database: STEAM_SILVER
+      +schema: STAGING
+    gold:
+      +materialized: table
+      +database: STEAM_GOLD
+      +schema: MARTS

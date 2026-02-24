@@ -1,0 +1,30 @@
+version: 2
+
+sources:
+  - name: steam_bronze
+    database: STEAM_BRONZE
+    schema: RAW
+    description: >
+      Raw Steam game data loaded as-is from CSV files into the Bronze layer.
+      No transformations applied. This is the source of truth.
+    tables:
+      - name: RAW_APPLICATION_INFO
+        description: "Game metadata: appid, type, name, releasedate, freetoplay (2,000 rows, 5 cols, has header)"
+      - name: RAW_GENRES
+        description: "Wide-format: appid + up to 8 genre values per row (2,000 rows, 1-9 cols, NO header)"
+      - name: RAW_TAGS
+        description: "Wide-format: appid + up to 20 tag values per row (2,000 rows, 1-21 cols, NO header)"
+      - name: RAW_DEVELOPERS
+        description: "Wide-format: appid + up to 7 developer names per row (2,000 rows, 1-8 cols, NO header)"
+      - name: RAW_PUBLISHERS
+        description: "Wide-format: appid + up to 4 publisher names per row (2,000 rows, 1-5 cols, NO header)"
+      - name: RAW_LANGUAGES
+        description: "Wide-format: appid + up to 28 language names per row (2,000 rows, 1-29 cols, NO header)"
+      - name: RAW_PACKAGES
+        description: "Wide-format: appid + up to 14 numeric package IDs per row (2,000 rows, 1-15 cols, NO header)"
+      - name: RAW_PRICES
+        description: "Daily price history: app_id, Date, Initialprice, Finalprice, Discount (725,268 rows, has header)"
+      - name: RAW_PLAYER_COUNTS_TOP
+        description: "Hourly player counts for top 1000 games (23.35M rows, has header)"
+      - name: RAW_PLAYER_COUNTS_BOTTOM
+        description: "Daily player counts for bottom 1000 games (973,000 rows, has header)"

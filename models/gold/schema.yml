@@ -66,3 +66,113 @@ models:
           - not_null
       - name: yoy_growth_pct
         description: "Year-over-year growth percentage (null for first year)"
+
+  # ── Star Schema: Dimensions ──────────────────────────────────
+
+  - name: dim_games
+    description: >
+      Central game dimension table. One row per Steam application.
+      Enriches stg_games with aggregated counts from bridge tables
+      and summary metrics from player counts and prices.
+      Join to all fact and bridge tables via app_id.
+    columns:
+      - name: app_id
+        description: Unique Steam application identifier
+        tests:
+          - unique
+          - not_null
+      - name: app_name
+        tests:
+          - not_null
+      - name: price_tier
+        description: "Categorical price bucket: Free to Play, $0-$5, $5-$15, $15-$30, $30+"
+      - name: popularity_quartile
+        description: "1=lowest 25%, 4=highest 25% based on peak_players"
+
+  - name: dim_genres
+    description: >
+      Genre bridge table. One row per (app_id, genre).
+      Join to dim_games on app_id.
+    columns:
+      - name: app_id
+        tests:
+          - not_null
+      - name: genre
+        tests:
+          - not_null
+
+  - name: dim_tags
+    description: >
+      Community tag bridge table. One row per (app_id, tag).
+      Join to dim_games on app_id.
+    columns:
+      - name: app_id
+        tests:
+          - not_null
+      - name: tag
+        tests:
+          - not_null
+
+  - name: dim_developers
+    description: >
+      Developer bridge table. One row per (app_id, developer).
+      Join to dim_games on app_id.
+    columns:
+      - name: app_id
+        tests:
+          - not_null
+      - name: developer
+        tests:
+          - not_null
+
+  - name: dim_publishers
+    description: >
+      Publisher bridge table. One row per (app_id, publisher).
+      Join to dim_games on app_id.
+    columns:
+      - name: app_id
+        tests:
+          - not_null
+      - name: publisher
+        tests:
+          - not_null
+
+  - name: dim_languages
+    description: >
+      Supported languages bridge table. One row per (app_id, language).
+      Join to dim_games on app_id.
+    columns:
+      - name: app_id
+        tests:
+          - not_null
+      - name: language
+        tests:
+          - not_null
+
+  # ── Star Schema: Facts ───────────────────────────────────────
+
+  - name: fact_player_counts
+    description: >
+      Daily player count fact table. One row per (app_id, activity_date).
+      Date range: Dec 2017 – Aug 2020 (~24.3M rows).
+      Join to dim_games on app_id.
+    columns:
+      - name: app_id
+        tests:
+          - not_null
+      - name: activity_date
+        tests:
+          - not_null
+
+  - name: fact_prices
+    description: >
+      Daily price observation fact table. One row per (app_id, price_date).
+      Date range: Apr 2019 – Aug 2020 (725,268 rows).
+      Join to dim_games on app_id.
+    columns:
+      - name: app_id
+        tests:
+          - not_null
+      - name: price_date
+        tests:
+          - not_null
